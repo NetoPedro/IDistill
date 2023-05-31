@@ -1,6 +1,6 @@
 # IDistill
 
-Official repository for the Unveiling the Two-Faced Truth: Disentangling Morphed Identities for Face Morphing Detectiont paper at [EUSIPCO 2023](http://eusipco2023.org/).
+Official repository for the "Unveiling the Two-Faced Truth: Disentangling Morphed Identities for Face Morphing Detection" paper at [EUSIPCO 2023](http://eusipco2023.org/).
 
 The paper can be viewed at: Soon
 
