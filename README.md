@@ -4,8 +4,12 @@ Official repository for the Unveiling the Two-Faced Truth: Disentangling Morphed
 
 The paper can be viewed at: Soon
 
+
+<img src="visualization.jpg" width="400" align="right"> 
+
 ## Abstract
 
+Morphing attacks keep threatening biometric systems, especially face recognition systems. Over time they have become simpler to perform and more realistic, as such, the usage of deep learning systems to detect these attacks has grown. At the same time, there is a constant concern regarding the lack of interpretability of deep learning models. Balancing performance and interpretability has been a difficult task for scientists. However, by leveraging domain information and proving some constraints, we have been able to develop IDistill, an interpretable method with state-of-the-art performance that provides information on both the identity separation on morph samples and their contribution to the final prediction. The domain information is learnt by an autoencoder and distilled to a classifier system in order to teach it to separate identity information. When compared to other methods in the literature it outpeforms them in three out of five databases and is competitive in the remaining. 
 
 ## How to run
 
