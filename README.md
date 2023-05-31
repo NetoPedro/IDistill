@@ -5,7 +5,7 @@ Official repository for the Unveiling the Two-Faced Truth: Disentangling Morphed
 The paper can be viewed at: Soon
 
 
-<img src="visualization.jpg" width="400" align="right"> 
+<img src="visualization.jpg" width="600" align="right"> 
 
 ## Abstract
 
