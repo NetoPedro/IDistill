@@ -4,7 +4,6 @@ from collections import OrderedDict
 # PyTorch Imports
 import torch
 import torch.nn as nn
-from torchinfo import summary
 
 
 
@@ -25,11 +24,8 @@ class UNetAutoencoder(nn.Module):
         self.encoder4 = UNetAutoencoder._block(features * 4, features * 8, name="enc4")
         self.pool4 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-
         # Encoder bottleneck
         self.bottleneck_pre_emb = UNetAutoencoder._block(features * 8, features * 16, name="bottleneck_pre_emb")
-
-
         
         # Get a fixed size embedding
         in_features_ = torch.rand(1, 3, img_size, img_size)
@@ -109,6 +105,7 @@ class UNetAutoencoder(nn.Module):
         dec1 = self.decoder1(dec1)
         
         return torch.sigmoid(self.conv(dec1)), embedding
+
 
     @staticmethod
     def _block(in_channels, features, name):

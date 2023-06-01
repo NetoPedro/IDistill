@@ -18,12 +18,10 @@ import wandb
 # Log in to W&B Account
 wandb.login()
 
-
 # Fix Random Seeds
 random_seed = 420
 torch.manual_seed(random_seed)
 np.random.seed(random_seed)
-
 
 # Project Imports
 from autoencoder_utils import UNetAutoencoder
@@ -78,7 +76,6 @@ parser.add_argument("--checkpoint", type=str, default=None, help="Checkpoint fro
 
 # Parse the arguments
 args = parser.parse_args()
-
 
 # Resume training
 if args.resume:
@@ -163,9 +160,6 @@ img_width = IMG_SIZE
 # Train Transforms
 train_transforms = torchvision.transforms.Compose([
     torchvision.transforms.Resize(IMG_SIZE if RESIZE_OPT == 'resizeshortest_randomcrop' else (IMG_SIZE, IMG_SIZE)),
-    # torchvision.transforms.RandomCrop(IMG_SIZE if RESIZE_OPT == 'resizeshortest_randomcrop' else (IMG_SIZE, IMG_SIZE)),
-    # torchvision.transforms.RandomAffine(degrees=(-10, 10), translate=(0.05, 0.1), scale=(0.95, 1.05), shear=0, resample=0, fillcolor=(0, 0, 0)),
-    # torchvision.transforms.RandomHorizontalFlip(p=0.5),
     torchvision.transforms.ToTensor(),
     torchvision.transforms.Normalize(mean=MEAN, std=STD)
 ])

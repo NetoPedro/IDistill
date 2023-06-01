@@ -18,8 +18,8 @@ from torch.utils.data import DataLoader
 # Project Imports
 from data_utils import FaceDataset
 from metrics_utils import performances_compute, performances_compute2
-from resnet_utils_min import Resnet18_Min, Resnet34_Min
-from resnet_utils_mult import Resnet18_Mult, Resnet34_Mult
+from resnet_utils_min import Resnet18_Min
+from resnet_utils_mult import Resnet18_Mult
 
 
 
@@ -55,7 +55,6 @@ def train_fn(model, data_loader, data_size, optimizer, criterion, weight_loss, l
             loss_2 = weight_loss * (-(1 + lmbda * torch.norm(outputs[1].view(outputs[2].shape[0], 1, -1), p=2)) * torch.div(labels, cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze()) + torch.mul(1 - labels, (cos_sim(lv_1, lv_2).squeeze() - cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), outputs[1].view(outputs[2].shape[0], 1, -1)).squeeze()).pow(2))).mean()
             loss_norm = -(1 + lmbda * torch.norm(outputs[1].view(outputs[2].shape[0], 1, -1), p=2)) * torch.div(labels, cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze()).mean()
             loss_similarity = torch.mul(1 - labels, (cos_sim(lv_1, lv_2).squeeze() - cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), outputs[1].view(outputs[2].shape[0], 1, -1)).squeeze()).pow(2)).mean()
-            #torch.mul(labels, cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze() + lmbda * torch.norm(outputs[1].view(outputs[2].shape[0], 1, -1), p=2)) 
             loss =  loss_1+loss_2 
             running_loss_1 += loss_1.item() * inputs.size(0)
             running_loss_2 += loss_2.item() * inputs.size(0)
@@ -73,17 +72,12 @@ def train_fn(model, data_loader, data_size, optimizer, criterion, weight_loss, l
             running_loss_similarity += loss_similarity.item() * inputs.size(0)
         elif loss_measure == 'prefusion':
             loss_1 = criterion(outputs[2], labels)
-            index_similarity = torch.abs(cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze()) < torch.abs(cos_sim(outputs[1].view(outputs[2].shape[0], 1, -1), lv_1).squeeze())
-            #
             part1 = np.minimum(int(epoch/20),1) * (1-outputs[4].pow(2) + (outputs[3]).pow(2)) - torch.abs(cos_sim(outputs[1].view(outputs[2].shape[0], 1, -1), lv_1).squeeze())
             part2 = np.minimum(int(epoch/20),1) * (1-outputs[3].pow(2) + (outputs[4]).pow(2)) - torch.abs(cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze())
-
             alternative_term_bf = torch.where((torch.abs(cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze()) < torch.abs(cos_sim(outputs[1].view(outputs[2].shape[0], 1, -1), lv_1).squeeze())),part1,part2) 
             loss_2 = weight_loss * ((alternative_term_bf * labels) + torch.mul(1 - labels, (cos_sim(lv_1, lv_2).squeeze() - cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), outputs[1].view(outputs[2].shape[0], 1, -1)).squeeze()).pow(2))).mean()
-            
             loss_norm = ((alternative_term_bf * labels).squeeze()).mean()
             loss_similarity = torch.mul(1 - labels, (cos_sim(lv_1, lv_2).squeeze() - cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), outputs[1].view(outputs[2].shape[0], 1, -1)).squeeze()).pow(2)).mean()
-            #torch.mul(labels, cos_sim(outputs[0].view(outputs[2].shape[0], 1, -1), lv_1).squeeze() + lmbda * torch.norm(outputs[1].view(outputs[2].shape[0], 1, -1), p=2)) 
             loss =  loss_1+loss_2 
             running_loss_1 += loss_1.item() * inputs.size(0)
             running_loss_2 += loss_2.item() * inputs.size(0)
@@ -140,9 +134,6 @@ def eval_fn(model, data_loader, data_size, criterion, device):
             running_loss += loss.item() * inputs.size(0)
             running_corrects += torch.sum(preds == labels.data)
         
-        # import pdb
-        # pdb.set_trace()
-        
         epoch_loss = running_loss / data_size
         epoch_acc = running_corrects.double() / data_size
         auc, eer_value, _ = performances_compute(prediction_scores, gt_labels, verbose=False)
@@ -187,7 +178,7 @@ def run_training(model, model_path, device, logging_path, num_epochs, dataloader
 
         if epoch % 5 == 0:
             mean = run_extra_test(model, device)
-        # deep copy the model
+            # deep copy the model
             if mean < lowest_eer:
                 lowest_eer = mean
                 lowest_20 = out_20
@@ -196,14 +187,7 @@ def run_training(model, model_path, device, logging_path, num_epochs, dataloader
                 lowest_01 = out_01
                 best_model_wts = copy.deepcopy(model.state_dict())
                 epochs_no_improve = 0
-        # if val_eer_values <= lowest_eer:
-        #     lowest_eer = val_eer_values
-        #     lowest_20 = out_20
-        #     lowest_10 = out_10
-        #     lowest_1 = out_1
-        #     lowest_01 = out_01
-        #     best_model_wts = copy.deepcopy(model.state_dict())
-        #     epochs_no_improve = 0
+
         else:
             epochs_no_improve += 1
 
@@ -222,7 +206,6 @@ def run_training(model, model_path, device, logging_path, num_epochs, dataloader
     logging.info(f'saved model path: {model_path}')
 
     with open("results_"+output_name, mode='a') as csv_file:
-        fieldnames = ['lower_eer','01','1','10','20']
         writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
         writer.writerow([lowest_eer,lowest_01,lowest_1,lowest_10,lowest_20])
 
@@ -239,7 +222,6 @@ def run_test(test_loader, model, model_path, device):
 
     prediction_scores, gt_labels = [], []
     with torch.no_grad():
-        running_corrects = 0
 
         for inputs, labels in tqdm(test_loader):
             inputs, labels= inputs.to(device), labels.to(device)
@@ -307,15 +289,8 @@ def run_extra_test(model,device):
         # Create the test loader
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=8)
         
-        
-        # Add the test loader and the dataset size to corresponding dictionaries
-        dataloaders = {'test': test_loader}
-        dataset_sizes = {'test': len(test_dataset)}
-        print('Test length:', len(test_dataset))
-        
         prediction_scores, gt_labels = [], []
         with torch.no_grad():
-            running_corrects = 0
 
             for inputs, labels in tqdm(test_loader):
                 inputs, labels= inputs.to(device), labels.to(device)
@@ -346,30 +321,18 @@ def run_extra_test(model,device):
 def main(args):
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
 
-
     device = f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
     
     model_name = args.model_name.lower()
 
-    assert model_name in ("resnet18_min", "resnet34_min", "resnet18_mult", "resnet34_mult"), "Please provide a valid model name ('resnet18_min', 'resnet34_min', 'resnet18_mult', 'resnet34_mult')-"
-
-
-    # Erase uppon review
-    # models = ["resnet18"]
-    # for model_name in models:
-    
+    assert model_name in ("resnet18_min", "resnet18_mult"), "Please provide a valid model name ('resnet18_min', 'resnet18_mult')-"
     
     if model_name == "resnet18_min":
         model = Resnet18_Min(args.latent_size)
-    elif model_name == "resnet34_min":
-        model = Resnet34_Min(args.latent_size)
     elif model_name == "resnet18_mult":
         model = Resnet18_Mult(args.latent_size)
-    elif model_name == "resnet34_mult":
-        model = Resnet34_Mult(args.latent_size)
     
     # Print model name
-    # print(model)
     print(f"Model: {model_name} with embedding latent size: {args.latent_size}.")
         
     if args.is_train:
@@ -411,10 +374,6 @@ def main(args):
                     bonafide_num += 1
         print('attack and bonafide num:', attack_num, bonafide_num)
 
-        # nSamples  = [attack_num, bonafide_num]
-        # normedWeights = [1 - (x / sum(nSamples)) for x in nSamples]
-        # normedWeights = torch.FloatTensor(normedWeights).to(device)
-
         #create log file and train model
         logging_path = os.path.join(args.output_dir, 'train_info.log')
         run_training(model, args.model_path, device, logging_path, args.max_epoch, dataloaders, dataset_sizes,args.lr,args.weight_loss, args.loss_measure, output_name=model_name)
@@ -426,6 +385,7 @@ def main(args):
 
         # Print the name of the test set
         print(f"Generating test results on: {args.test_csv_path}")
+
         # Create the test set
         test_dataset = FaceDataset(
             file_name=args.test_csv_path,
@@ -436,18 +396,16 @@ def main(args):
         # Create the test loader
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=8)
         
-        
         # Add the test loader and the dataset size to corresponding dictionaries
         dataloaders = {'test': test_loader}
         dataset_sizes = {'test': len(test_dataset)}
         print('Test length:', len(test_dataset))
         
-        
-        # create save directory and path
+        # Create save directory and path
         test_output_folder = os.path.join(args.output_dir, 'test_results')
         Path(test_output_folder).mkdir(parents=True, exist_ok=True)
         test_output_path = os.path.join(test_output_folder, 'test_results.csv')
-        # test
+        # Test
         test_prediction_scores = run_test(test_loader=test_loader, model=model, model_path=args.model_path, device=device)
         write_scores(args.test_csv_path, test_prediction_scores, test_output_path)
 

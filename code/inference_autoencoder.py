@@ -61,7 +61,6 @@ args = parser.parse_args()
 
 
 
-
 # Data directory
 DATA_DIR = args.data_dir
 
@@ -88,18 +87,15 @@ CHECKPOINT = args.checkpoint
 
 
 
-
 # Load data
 # Mean and STD to Normalize the inputs into pretrained models
 MEAN = [0.5, 0.5, 0.5]
 STD = [0.5, 0.5, 0.5]
 
-
 # Input Data Dimensions
 img_nr_channels = 3
 img_height = IMG_SIZE
 img_width = IMG_SIZE
-
 
 # Train Transforms
 transforms = torchvision.transforms.Compose([
@@ -133,12 +129,9 @@ if DATASET == "BonaFideImages":
 DEVICE = f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
-
 # ResNet50
 if MODEL_NAME == "UNetAutoencoder".lower():
     model = UNetAutoencoder(embedding_size=EMB_SIZE)
-
-
 
 # Put model into DEVICE (CPU or GPU)
 model = model.to(DEVICE)
@@ -148,7 +141,6 @@ model = model.to(DEVICE)
 checkpoint = torch.load(CHECKPOINT)
 model.load_state_dict(checkpoint['model_state_dict'], strict=True)
 print(f"Loading weights from {CHECKPOINT}.")
-
 
 
 # Put model in evaluation modetrain_loader
@@ -192,8 +184,6 @@ with torch.no_grad():
             allow_pickle=True,
             fix_imports=True
         )
-
-
 
 # Finish statement
 print("Finished.")

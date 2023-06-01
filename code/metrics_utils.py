@@ -130,20 +130,3 @@ def performances_compute2(prediction_scores, gt_labels, threshold_type='eer', op
         print(f'AUC@ROC: {val_auc}, threshold:{threshold}, EER: {val_eer}, APCER:{threshold_APCER}, BPCER:{threshold_BPCER}, ACER:{threshold_ACER}')
 
     return val_auc, bpcer, [threshold, threshold_APCER, threshold_BPCER, threshold_ACER]
-
-
-
-# Function: Evaluation based on threshold
-def evalute_threshold_based(prediction_scores, gt_labels, threshold):
-    data = [{'map_score': score, 'label': label} for score, label in zip(prediction_scores, gt_labels)]
-    num_real = len([s for s in data if s['label'] == 1])
-    num_fake = len([s for s in data if s['label'] == 0])
-
-    type1 = len([s for s in data if s['map_score'] <= threshold and s['label'] == 1])
-    type2 = len([s for s in data if s['map_score'] > threshold and s['label'] == 0])
-
-    test_threshold_APCER = type2 / num_fake
-    test_threshold_BPCER = type1 / num_real
-    test_threshold_ACER = (test_threshold_APCER + test_threshold_BPCER) / 2.0
-
-    return test_threshold_APCER, test_threshold_BPCER, test_threshold_ACER
