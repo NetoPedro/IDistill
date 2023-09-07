@@ -24,4 +24,12 @@ The code was extended from the initial code of [SMDD-Synthetic-Face-Morphing-Att
 ## Citation
 If you use our code or data in your research, please cite with:
 
-
+```bibtex
+@inproceedings{caldeira2023unveiling,
+  title={Unveiling the Two-Faced Truth: Disentangling Morphed Identities for Face Morphing Detection},
+  author={Caldeira, Eduarda and Neto, Pedro C and Gon{\c{c}}alves, Tiago and Damer, Naser and Sequeira, Ana F and Cardoso, Jaime S},
+  booktitle={2023 31th European Signal Processing Conference (EUSIPCO)},
+  year={2023},
+  organization={IEEE}
+}
+```
